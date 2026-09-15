@@ -30,7 +30,7 @@
   .scale label{border:2px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;font-size:14px;cursor:pointer;background:#fff}
   .scale label:has(input:checked){border-color:var(--blue);background:#EAF2FD}
   .scale input{position:absolute;opacity:0;width:0;height:0}
-  input[type=text],textarea,select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=text],input[type=tel],textarea,select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
   textarea{min-height:80px;resize:vertical}
   .btn{border:0;background:var(--blue);color:#fff;font:inherit;font-weight:600;font-size:19px;padding:13px 30px;border-radius:999px;cursor:pointer;box-shadow:0 4px 0 var(--blueDark)}
   .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--blueDark)}
@@ -99,8 +99,24 @@
   <p class="intro" id="intro">Hubert is a little desktop speaker that shows how a voice message feels with his face and a glow of colour. This takes about 8 minutes. There are no right answers.</p>
   <div class="progress"><i id="bar"></i></div>
 
+  <!-- Front page -->
+  <section class="step on" data-step="0">
+    <div class="card">
+      <h2>Before you start</h2>
+      <div class="q"><p class="t">Your details</p>
+        <p style="margin:0 0 10px">We may need to contact you about your answers, so please leave your name and Telegram handle.</p>
+        <input type="text" name="name" placeholder="Name" style="margin-bottom:8px" required>
+        <input type="text" name="telegram" placeholder="Telegram handle, e.g. @hubert" required></div>
+      <div class="q"><p class="t">Follow-up testing <small>Optional</small></p>
+        <p style="margin:0 0 10px">We will be testing a printed 3D Hubert in person soon. There may be a thank-you gift for taking part.</p>
+        <div class="choices" data-name="followup" data-multi="1"><label><input type="checkbox" name="followup" value="Yes">Invite me to the 3D testing session</label></div></div>
+      <p style="font-size:14px;color:var(--soft);margin:0">Your contact details are only used to reach you about this survey and the testing session. They are kept separate from your survey answers when we analyse them.</p>
+    </div>
+    <div class="nav"><button class="btn next">Start</button><span class="err"></span></div>
+  </section>
+
   <!-- A -->
-  <section class="step on" data-step="A">
+  <section class="step" data-step="A">
     <div class="card">
       <h2>About you</h2>
       <div class="q"><p class="t">Have you been in a long-distance relationship (family, friends or romantic)?</p>
@@ -234,7 +250,9 @@
 
   <section class="step done" data-step="Z">
     <h2>Thanks, Hubert says hi.</h2>
-    <p class="intro" style="margin:0 auto">Your answers are in. You can close this page.</p>
+    <p class="intro" style="margin:0 auto 18px">Your answers are in. You can close this page.</p>
+    <p style="font-size:15px;color:var(--soft);margin:0">Completion code</p>
+    <p id="code" style="font-size:36px;font-weight:600;letter-spacing:2px;margin:0"></p>
   </section>
 </main>
 
@@ -280,6 +298,7 @@ function showStep(i){
   document.getElementById('intro').style.display = i===0 ? '' : 'none';
   window.scrollTo({top:0,behavior:'smooth'});
   const hook = onEnter[steps[i].dataset.step]; if(hook) hook();
+  if(steps[i].dataset.step==='Z') document.getElementById('code').textContent = data.session.toUpperCase();
 }
 // generic collect + validate for sections with data-name groups and text inputs
 function collect(section){
@@ -289,7 +308,7 @@ function collect(section){
     if(g.dataset.multi){ data[n]=checked.join('; '); }
     else { if(!checked.length) errs.push(n); data[n]=checked[0]||''; }
   });
-  section.querySelectorAll('input[type=text],textarea,select').forEach(x=>{ data[x.name]=x.value.trim(); });
+  section.querySelectorAll('input[type=text],input[type=tel],textarea,select').forEach(x=>{ data[x.name]=x.value.trim(); if(x.required && !data[x.name]) errs.push(x.name); });
   return errs;
 }
 document.querySelectorAll('.step .next').forEach(b=>b.addEventListener('click', ()=>{
